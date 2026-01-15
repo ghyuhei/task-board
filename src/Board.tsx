@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   DndContext,
   type DragEndEvent,
@@ -56,20 +56,37 @@ export function Board() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
+  const sensors = useMemo(() =>
+    useSensors(
+      useSensor(PointerSensor, {
+        activationConstraint: {
+          distance: 8,
+        },
+      })
+    ),
+    []
   );
 
+  // Debounce localStorage saves to avoid performance issues during drag operations
+  const saveTimeoutRef = useRef<number | null>(null);
+
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    } catch (error) {
-      console.error('Failed to save tasks to localStorage:', error);
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      } catch (error) {
+        console.error('Failed to save tasks to localStorage:', error);
+      }
+    }, 500); // Debounce 500ms
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [tasks]);
 
   useEffect(() => {
