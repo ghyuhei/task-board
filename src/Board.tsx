@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   DndContext,
   type DragEndEvent,
@@ -134,14 +134,44 @@ export function Board() {
         const data = JSON.parse(content);
 
         if (data.tasks && Array.isArray(data.tasks)) {
-          const tasksWithTags = data.tasks.map((task: Task) => ({
-            ...task,
-            tags: task.tags || [],
-          }));
-          setTasks(tasksWithTags);
+          // Validate and sanitize imported tasks
+          const validColumnIds = new Set(columns.map(col => col.id));
+          const sanitizedTasks = data.tasks
+            .filter((task: Partial<Task>) => {
+              // Basic validation
+              return task &&
+                     typeof task === 'object' &&
+                     typeof task.title === 'string' &&
+                     (task.columnId === undefined || validColumnIds.has(task.columnId as ColumnId));
+            })
+            .map((task: Partial<Task>): Task => ({
+              id: typeof task.id === 'string' ? task.id : `task-${Date.now()}-${Math.random()}`,
+              title: String(task.title || 'Untitled').substring(0, 500), // Limit length
+              description: typeof task.description === 'string' ? task.description.substring(0, 5000) : '',
+              columnId: (validColumnIds.has(task.columnId as ColumnId) ? task.columnId : 'todo') as ColumnId,
+              createdAt: typeof task.createdAt === 'number' ? task.createdAt : Date.now(),
+              tags: Array.isArray(task.tags) ? task.tags.filter(t => typeof t === 'string').map(t => String(t).substring(0, 50)) : [],
+            }));
+          setTasks(sanitizedTasks);
         }
         if (data.columns && Array.isArray(data.columns)) {
-          setColumns(data.columns);
+          // Validate and sanitize columns
+          const sanitizedColumns = data.columns
+            .filter((col: Partial<BoardColumn>) => {
+              return col &&
+                     typeof col === 'object' &&
+                     typeof col.id === 'string' &&
+                     typeof col.title === 'string';
+            })
+            .map((col: Partial<BoardColumn>): BoardColumn => ({
+              id: String(col.id) as ColumnId,
+              title: String(col.title).substring(0, 100),
+              color: typeof col.color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(col.color) ? col.color : '#FFE5B4',
+            }));
+
+          if (sanitizedColumns.length > 0) {
+            setColumns(sanitizedColumns);
+          }
         }
 
         alert('データを正常にインポートしました！');
@@ -206,25 +236,22 @@ export function Board() {
     setSelectedTags([]);
   };
 
-  const getAllTags = (): string[] => {
-    const allTags = new Set<string>();
-    tasks.forEach((task) => task.tags.forEach((tag) => allTags.add(tag)));
-    return Array.from(allTags).sort();
-  };
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    tasks.forEach((task) => task.tags.forEach((tag) => tagSet.add(tag)));
+    return Array.from(tagSet).sort();
+  }, [tasks]);
 
-  const getFilteredTasks = (): Task[] => {
+  const filteredTasks = useMemo(() => {
     if (selectedTags.length === 0) return tasks;
     return tasks.filter((task) =>
       selectedTags.every((tag) => task.tags.includes(tag))
     );
-  };
+  }, [tasks, selectedTags]);
 
   const getTasksByColumn = (columnId: ColumnId) => {
-    const filteredTasks = getFilteredTasks();
     return filteredTasks.filter((task) => task.columnId === columnId);
   };
-
-  const allTags = getAllTags();
 
   return (
     <>
