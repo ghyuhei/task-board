@@ -14,6 +14,111 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.board-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.control-btn {
+  padding: 10px 20px;
+  background: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.control-btn:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.control-btn:active {
+  transform: translateY(0);
+}
+
+.file-input {
+  display: none;
+}
+
+.tag-filter-bar {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+}
+
+.tag-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.clear-filters-btn {
+  padding: 6px 12px;
+  background: #ff6b6b;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-filters-btn:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
+}
+
+.tag-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-tag {
+  padding: 6px 14px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.filter-tag.active {
+  border-color: #333;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -41,6 +146,23 @@
 .column-header h2 {
   font-size: 1.3rem;
   color: #333;
+}
+
+.column-title {
+  outline: none;
+  cursor: text;
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: background 0.2s;
+}
+
+.column-title:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.column-title:focus {
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .task-count {
@@ -115,13 +237,91 @@
   cursor: grabbing;
 }
 
-.task-content {
+.task-title {
+  outline: none;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #222;
+  margin-bottom: 8px;
+  word-wrap: break-word;
+  line-height: 1.3;
+  cursor: text;
+}
+
+.task-title:empty::before {
+  content: 'Untitled task';
+  color: #999;
+  font-weight: normal;
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+
+.expand-btn:hover {
+  color: #333;
+}
+
+.task-description {
   outline: none;
   min-height: 40px;
   word-wrap: break-word;
-  color: #333;
-  font-size: 1rem;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+  cursor: text;
+}
+
+.task-description-placeholder {
+  outline: none;
+  min-height: 20px;
+  word-wrap: break-word;
+  color: #999;
+  font-size: 0.85rem;
   line-height: 1.4;
+  margin-bottom: 8px;
+  cursor: text;
+}
+
+.task-description-placeholder:empty::before {
+  content: 'Click to add description...';
+  color: #bbb;
+}
+
+.task-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.task-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #333;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s;
+}
+
+.task-tag:hover {
+  transform: scale(1.05);
 }
 
 .delete-btn {
